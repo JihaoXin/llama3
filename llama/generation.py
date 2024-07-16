@@ -175,7 +175,6 @@ class Llama:
             )
 
         stop_tokens = torch.tensor(list(self.tokenizer.stop_tokens))
-
         for cur_pos in range(min_prompt_len, total_len):
             logits = self.model.forward(tokens[:, prev_pos:cur_pos], prev_pos)
             if temperature > 0:
@@ -228,7 +227,7 @@ class Llama:
 
     def text_completion(
         self,
-        prompts: List[str],
+        prompt_tokens: List[str],
         temperature: float = 0.6,
         top_p: float = 0.9,
         max_gen_len: Optional[int] = None,
@@ -257,7 +256,6 @@ class Llama:
         """
         if max_gen_len is None:
             max_gen_len = self.model.params.max_seq_len - 1
-        prompt_tokens = [self.tokenizer.encode(x, bos=True, eos=False) for x in prompts]
         generation_tokens, generation_logprobs = self.generate(
             prompt_tokens=prompt_tokens,
             max_gen_len=max_gen_len,
