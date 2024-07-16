@@ -1,24 +1,59 @@
-<p align="center">
-  <img src="https://github.com/meta-llama/llama3/blob/main/Llama3_Repo.jpeg" width="400"/>
-</p>
+# Llama 3
+This repo is forked from Meta's LLAMA3.
 
-<p align="center">
-        🤗 <a href="https://huggingface.co/meta-Llama"> Models on Hugging Face</a>&nbsp | <a href="https://ai.meta.com/blog/"> Blog</a>&nbsp |  <a href="https://llama.meta.com/">Website</a>&nbsp | <a href="https://llama.meta.com/get-started/">Get Started</a>&nbsp
-<br>
+We give examples to run the Llama3-70B model without loading the weights for fast prototyping.
+
+The eventual target is to apply DistFuse to speedup the LLM inference.
+
+For more information please refer to the original **META's README** below.
+
+## Quick Start
+#### Install
+``` sh
+git clone https://github.com/username/llama3.git
+cd llama3
+# Update Submodule - FairScale
+git submodule update --init --recursive
+git pull --recurse-submodules
+git submodule update --recursive
+
+# Install dependency
+conda create --name <name> python=3.12.4
+pip install -e .
+
+# Install fairscale
+cd fairscale
+pip install -r requirements.txt
+# -e signified dev mode since e stands for editable; "8.0" is for A100, replace the arch for different GPU.
+BUILD_CUDA_EXTENSIONS=1 TORCH_CUDA_ARCH_LIST="8.0" pip install --no-build-isolation -e .
+cd ..
+```
+#### Execute
+The main script is put at `jihao_examples/sc_example_text.py`, it will dry run the inference without loading the weights.
+
+To change the model architecture such as the number of attention layers, please modify `jihao_examples/params.json`
+```sh
+cd jihao_examples
+
+# Run with 4 GPUs
+torchrun --nproc_per_node=4 sc_example_text.py --ckpt_dir ~/llama3/Meta-Llama-3-70B/ --tokenizer_path  ~/llama3/Meta-Llama-3-70B/tokenizer.model --batch_size=4 --token_length=1024 --max_seq_len=1024 --max_batch_size=32 --max_gen_len=1
+
+# Profile with ncu
+ncu --set full --target-processes all --force-overwrite --export ../profile/llama3_1layer torchrun --nproc_per_node=4 sc_example_text.py --ckpt_dir ~/llama3/Meta-Llama-3-70B/ --tokenizer_path  ~/llama3/Meta-Llama-3-70B/tokenizer.model --batch_size=4 --token_length=1024 --max_seq_len=1024 --max_batch_size=32 --max_gen_len=1
+```
+The `jihao_examples/allreduce.py` is designed to test the latency of the allreduce function from pytorch
+```
+python -m torch.distributed.launch --nproc_per_node=4 allreduce.py
+```
+The `jihao_examples/ds_example_chat.py` and `jihao_examples/hf_example_chat.py` are examples to run llama3 with deepspeed and huggingface. They are deprecated and cannot run directly.
 
 ---
-
-
-# Meta Llama 3
-
-We are unlocking the power of large language models. Our latest version of Llama is now accessible to individuals, creators, researchers, and businesses of all sizes so that they can experiment, innovate, and scale their ideas responsibly.
-
-This release includes model weights and starting code for pre-trained and instruction-tuned Llama 3 language models — including sizes of 8B to 70B parameters.
-
-This repository is a minimal example of loading Llama 3 models and running inference. For more detailed examples, see [llama-recipes](https://github.com/facebookresearch/llama-recipes/).
+---
+# META's README
+---
+---
 
 ## Download
-
 To download the model weights and tokenizer, please visit the [Meta Llama website](https://llama.meta.com/llama-downloads/) and accept our License.
 
 Once your request is approved, you will receive a signed URL over email. Then, run the download.sh script, passing the URL provided when prompted to start the download.
