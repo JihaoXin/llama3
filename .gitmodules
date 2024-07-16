@@ -1,0 +1,3 @@
+[submodule "fairscale"]
+	path = fairscale
+	url = https://github.com/JihaoXin/fairscale/
