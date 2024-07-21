@@ -1,3 +1,6 @@
 [submodule "fairscale"]
 	path = fairscale
 	url = https://github.com/JihaoXin/fairscale/
+[submodule "DistFuse"]
+	path = DistFuse
+	url = git@github.com:JihaoXin/DistFuse.git
