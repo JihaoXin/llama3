@@ -1,6 +1,10 @@
 # torchrun --nproc_per_node=4 sc_example_text.py --ckpt_dir ~/llama3/Meta-Llama-3-70B/ --tokenizer_path  ~/llama3/Meta-Llama-3-70B/tokenizer.model --batch_size=4 --token_length=1024 --max_seq_len=1024 --max_batch_size=32 --max_gen_len=1
 # ncu --set full --target-processes all --force-overwrite --export ../profile/llama3_1layer torchrun --nproc_per_node=4 sc_example_text.py --ckpt_dir ~/llama3/Meta-Llama-3-70B/ --tokenizer_path  ~/llama3/Meta-Llama-3-70B/tokenizer.model --max_gen_len=
 # BUILD_CUDA_EXTENSIONS=1 TORCH_CUDA_ARCH_LIST="8.0" pip install --no-build-isolation -e .
+# nvidia-smi -pm 1
+# nvidia-smi -lgc 1410,1410
+# nvidia-smi -pm 0
+# nvidia-smi --reset-gpu-clocks
 import json
 import os
 import sys
@@ -8,6 +12,7 @@ import time  # Import the time module
 from typing import Optional, List
 import random
 import string
+import warnings
 
 import fire
 import torch
@@ -32,8 +37,8 @@ def main(
     batch_size = 1,
     token_length = 1024,
     max_gen_len: Optional[int] = None,
-    warmup = 2,
-    repeat = 5,
+    warmup = 1,
+    repeat = 2,
 ):
     # Set up parameters
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
@@ -106,4 +111,6 @@ def main(
     #     print("\n==================================\n")
 
 if __name__ == "__main__":
+
+    warnings.filterwarnings("ignore")
     fire.Fire(main)
